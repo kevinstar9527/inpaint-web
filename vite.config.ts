@@ -28,10 +28,25 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/hf-mirror/, ''),
       },
+      '/modelscope': {
+        target: 'https://www.modelscope.cn',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/modelscope/, ''),
+      },
+      '/modelscope-cn': {
+        target: 'https://modelscope.cn',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/modelscope-cn/, ''),
+      },
       '/huggingface': {
         target: 'https://huggingface.co',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/huggingface/, ''),
+      },
+      '/hf-cdn': {
+        target: 'https://hf-cdn.sufy.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/hf-cdn/, ''),
       },
     },
   },

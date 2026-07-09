@@ -12,6 +12,15 @@ function proxyUrl(url: string): string {
   if (url.startsWith('https://huggingface.co')) {
     return url.replace('https://huggingface.co', '/huggingface')
   }
+  if (url.startsWith('https://www.modelscope.cn')) {
+    return url.replace('https://www.modelscope.cn', '/modelscope')
+  }
+  if (url.startsWith('https://modelscope.cn')) {
+    return url.replace('https://modelscope.cn', '/modelscope-cn')
+  }
+  if (url.startsWith('https://hf-cdn.sufy.com')) {
+    return url.replace('https://hf-cdn.sufy.com', '/hf-cdn')
+  }
   return url
 }
 
@@ -38,7 +47,7 @@ function getModel(modelType: modelType) {
       },
       {
         name: 'migan-pipeline-v2',
-        url: 'https://hf-mirror.com/andraniksargsyan/migan/resolve/main/migan_pipeline_v2.onnx',
+        url: 'https://www.modelscope.cn/api/v1/models/phodit/migan-pipeline-v2/repo?Revision=master&FilePath=migan_pipeline_v2.onnx',
         backupUrl:
           'https://huggingface.co/andraniksargsyan/migan/resolve/main/migan_pipeline_v2.onnx',
       },
@@ -50,7 +59,7 @@ function getModel(modelType: modelType) {
     const modelList = [
       {
         name: 'realesrgan-x4',
-        url: 'https://huggingface.co/lxfater/inpaint-web/resolve/main/realesrgan-x4.onnx',
+        url: 'https://www.modelscope.cn/api/v1/models/qiqi123/inpaint-web/repo?Revision=master&FilePath=realesrgan-x4.onnx',
         backupUrl:
           'https://worker-share-proxy-01f5.lxfater.workers.dev/lxfater/inpaint-web/resolve/main/realesrgan-x4.onnx',
       },
