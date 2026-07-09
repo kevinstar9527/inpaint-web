@@ -37,17 +37,17 @@ function getModel(modelType: modelType) {
     const modelList = [
       {
         name: 'model',
-        url: '/models/migan.onnx',
+        url: '/inpaint-web/models/migan.onnx',
         backupUrl: 'https://huggingface.co/lxfater/inpaint-web/resolve/main/migan.onnx',
       },
       {
         name: 'model-perf',
-        url: '/models/migan-perf.onnx',
+        url: '/inpaint-web/models/migan-perf.onnx',
         backupUrl: 'https://huggingface.co/andraniksargsyan/migan/resolve/main/migan.onnx',
       },
       {
         name: 'migan-pipeline-v2',
-        url: '/models/migan_pipeline_v2.onnx',
+        url: '/inpaint-web/models/migan_pipeline_v2.onnx',
         backupUrl:
           'https://huggingface.co/andraniksargsyan/migan/resolve/main/migan_pipeline_v2.onnx',
       },
@@ -59,7 +59,7 @@ function getModel(modelType: modelType) {
     const modelList = [
       {
         name: 'realesrgan-x4',
-        url: '/models/realesrgan-x4.onnx',
+        url: '/inpaint-web/models/realesrgan-x4.onnx',
         backupUrl:
           'https://huggingface.co/lxfater/inpaint-web/resolve/main/realesrgan-x4.onnx',
       },
