@@ -37,17 +37,17 @@ function getModel(modelType: modelType) {
     const modelList = [
       {
         name: 'model',
-        url: 'https://hf-mirror.com/lxfater/inpaint-web/resolve/main/migan.onnx',
+        url: '/models/migan.onnx',
         backupUrl: 'https://huggingface.co/lxfater/inpaint-web/resolve/main/migan.onnx',
       },
       {
         name: 'model-perf',
-        url: 'https://hf-mirror.com/andraniksargsyan/migan/resolve/main/migan.onnx',
+        url: '/models/migan-perf.onnx',
         backupUrl: 'https://huggingface.co/andraniksargsyan/migan/resolve/main/migan.onnx',
       },
       {
         name: 'migan-pipeline-v2',
-        url: 'https://www.modelscope.cn/api/v1/models/phodit/migan-pipeline-v2/repo?Revision=master&FilePath=migan_pipeline_v2.onnx',
+        url: '/models/migan_pipeline_v2.onnx',
         backupUrl:
           'https://huggingface.co/andraniksargsyan/migan/resolve/main/migan_pipeline_v2.onnx',
       },
@@ -59,9 +59,9 @@ function getModel(modelType: modelType) {
     const modelList = [
       {
         name: 'realesrgan-x4',
-        url: 'https://www.modelscope.cn/api/v1/models/qiqi123/inpaint-web/repo?Revision=master&FilePath=realesrgan-x4.onnx',
+        url: '/models/realesrgan-x4.onnx',
         backupUrl:
-          'https://worker-share-proxy-01f5.lxfater.workers.dev/lxfater/inpaint-web/resolve/main/realesrgan-x4.onnx',
+          'https://huggingface.co/lxfater/inpaint-web/resolve/main/realesrgan-x4.onnx',
       },
     ]
     const currentModel = modelList[0]
