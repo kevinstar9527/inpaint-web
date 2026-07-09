@@ -564,6 +564,7 @@ const undo = async () => {
   const r = renders.value
   r.pop()
   renders.value = [...r]
+  draw()
 }
 
 watch(
