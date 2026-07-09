@@ -1,11 +1,10 @@
 import { defineConfig } from 'vitest/config'
-import react from '@vitejs/plugin-react-swc'
-import eslintPlugin from 'vite-plugin-eslint'
+import vue from '@vitejs/plugin-vue'
 
 // https://vitejs.dev/config/
 export default defineConfig({
   base: '/',
-  plugins: [react(), eslintPlugin()],
+  plugins: [vue()],
   test: {
     globals: true,
     environment: 'jsdom',
@@ -22,6 +21,18 @@ export default defineConfig({
     headers: {
       'Cross-Origin-Opener-Policy': 'same-origin',
       'Cross-Origin-Embedder-Policy': 'require-corp',
+    },
+    proxy: {
+      '/hf-mirror': {
+        target: 'https://hf-mirror.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/hf-mirror/, ''),
+      },
+      '/huggingface': {
+        target: 'https://huggingface.co',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/huggingface/, ''),
+      },
     },
   },
 })

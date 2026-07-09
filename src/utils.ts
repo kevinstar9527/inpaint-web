@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { ref, watch, type Ref } from 'vue'
 
 export function dataURItoBlob(dataURI: string) {
   const mime = dataURI.split(',')[0].split(':')[1].split(';')[0]
@@ -10,24 +10,11 @@ export function dataURItoBlob(dataURI: string) {
   return new Blob([new Uint8Array(array)], { type: mime })
 }
 
-// const dataURItoBlob = (dataURI: string) => {
-//   const bytes =
-//     dataURI.split(',')[0].indexOf('base64') >= 0
-//       ? atob(dataURI.split(',')[1])
-//       : unescape(dataURI.split(',')[1])
-//   const mime = dataURI.split(',')[0].split(':')[1].split(';')[0]
-//   const max = bytes.length
-//   const ia = new Uint8Array(max)
-//   for (var i = 0; i < max; i++) ia[i] = bytes.charCodeAt(i)
-//   return new Blob([ia], { type: mime })
-// }
-
 export function downloadImage(uri: string, name: string) {
   const link = document.createElement('a')
   link.href = uri
   link.download = name
 
-  // this is necessary as link.click() does not work on the latest firefox
   link.dispatchEvent(
     new MouseEvent('click', {
       bubbles: true,
@@ -37,8 +24,6 @@ export function downloadImage(uri: string, name: string) {
   )
 
   setTimeout(() => {
-    // For Firefox it is necessary to delay revoking the ObjectURL
-    // window.URL.revokeObjectURL(base64)
     link.remove()
   }, 100)
 }
@@ -57,49 +42,47 @@ export function loadImage(image: HTMLImageElement, src: string) {
 }
 
 export function useImage(
-  file: Blob | MediaSource
-): [HTMLImageElement, boolean, (width: number, height: number) => void] {
-  const [image, setImage] = useState(new Image())
-  const [isLoaded, setIsLoaded] = useState(false)
+  file: Ref<File | undefined>
+): [Ref<HTMLImageElement>, Ref<boolean>, (width: number, height: number) => void] {
+  const image = ref(new Image())
+  const isLoaded = ref(false)
 
-  // 调整图像分辨率的函数
-  const adjustResolution = useCallback(
-    (width, height) => {
-      const canvas = document.createElement('canvas')
-      const context = canvas.getContext('2d')!
-      canvas.width = width
-      canvas.height = height
-      context.drawImage(image, 0, 0, width, height)
-      const resizedImage = new Image()
-      resizedImage.src = canvas.toDataURL()
-      setImage(resizedImage)
+  const adjustResolution = (width: number, height: number) => {
+    const canvas = document.createElement('canvas')
+    const context = canvas.getContext('2d')!
+    canvas.width = width
+    canvas.height = height
+    context.drawImage(image.value, 0, 0, width, height)
+    const resizedImage = new Image()
+    resizedImage.src = canvas.toDataURL()
+    image.value = resizedImage
+  }
+
+  watch(
+    () => file.value,
+    (newFile) => {
+      if (!newFile) return
+
+      const newImage = new Image()
+      newImage.onload = () => {
+        isLoaded.value = true
+      }
+      newImage.src = URL.createObjectURL(newFile)
+      image.value = newImage
     },
-    [image]
+    { immediate: true }
   )
-
-  useEffect(() => {
-    const newImage = new Image()
-    newImage.onload = () => {
-      setIsLoaded(true)
-    }
-    newImage.src = URL.createObjectURL(file)
-    setImage(newImage)
-
-    return () => {
-      newImage.onload = null
-    }
-  }, [file])
 
   return [image, isLoaded, adjustResolution]
 }
 
-// https://stackoverflow.com/questions/23945494/use-html5-to-resize-an-image-before-upload
 interface ResizeImageFileResult {
   file: File
   resized: boolean
   originalWidth?: number
   originalHeight?: number
 }
+
 export function resizeImageFile(
   file: File,
   maxSize: number

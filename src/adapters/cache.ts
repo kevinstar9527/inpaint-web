@@ -2,6 +2,19 @@ import localforage from 'localforage'
 
 export type modelType = 'inpaint' | 'superResolution'
 
+const isDev = typeof window !== 'undefined' && window.location.hostname === 'localhost'
+
+function proxyUrl(url: string): string {
+  if (!isDev) return url
+  if (url.startsWith('https://hf-mirror.com')) {
+    return url.replace('https://hf-mirror.com', '/hf-mirror')
+  }
+  if (url.startsWith('https://huggingface.co')) {
+    return url.replace('https://huggingface.co', '/huggingface')
+  }
+  return url
+}
+
 localforage.config({
   name: 'modelCache',
 })
@@ -15,19 +28,19 @@ function getModel(modelType: modelType) {
     const modelList = [
       {
         name: 'model',
-        url: 'https://huggingface.co/lxfater/inpaint-web/resolve/main/migan.onnx',
-        backupUrl: '',
+        url: 'https://hf-mirror.com/lxfater/inpaint-web/resolve/main/migan.onnx',
+        backupUrl: 'https://huggingface.co/lxfater/inpaint-web/resolve/main/migan.onnx',
       },
       {
         name: 'model-perf',
-        url: 'https://huggingface.co/andraniksargsyan/migan/resolve/main/migan.onnx',
-        backupUrl: '',
+        url: 'https://hf-mirror.com/andraniksargsyan/migan/resolve/main/migan.onnx',
+        backupUrl: 'https://huggingface.co/andraniksargsyan/migan/resolve/main/migan.onnx',
       },
       {
         name: 'migan-pipeline-v2',
-        url: 'https://huggingface.co/andraniksargsyan/migan/resolve/main/migan_pipeline_v2.onnx',
+        url: 'https://hf-mirror.com/andraniksargsyan/migan/resolve/main/migan_pipeline_v2.onnx',
         backupUrl:
-          'https://worker-share-proxy-01f5.lxfater.workers.dev/andraniksargsyan/migan/resolve/main/migan_pipeline_v2.onnx',
+          'https://huggingface.co/andraniksargsyan/migan/resolve/main/migan_pipeline_v2.onnx',
       },
     ]
     const currentModel = modelList[2]
@@ -65,7 +78,7 @@ export async function ensureModel(modelType: modelType) {
     return loadModel(modelType)
   }
   const model = getModel(modelType)
-  const response = await fetch(model.url)
+  const response = await fetch(proxyUrl(model.url))
   const buffer = await response.arrayBuffer()
   await saveModel(modelType, buffer)
   return buffer
@@ -117,11 +130,11 @@ export async function downloadModel(
 
   const model = getModel(modelType)
   try {
-    await downloadFromUrl(model.url)
+    await downloadFromUrl(proxyUrl(model.url))
   } catch (e) {
     if (model.backupUrl) {
       try {
-        await downloadFromUrl(model.backupUrl)
+        await downloadFromUrl(proxyUrl(model.backupUrl))
       } catch (r) {
         alert(`Failed to download the backup model: ${r}`)
       }
