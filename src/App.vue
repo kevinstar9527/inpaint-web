@@ -1,15 +1,15 @@
 <template>
   <div class="min-h-full flex flex-col relative">
-    <header class="z-10 border-b border-gray-200 dark:border-neutral-800 flex flex-row items-center md:justify-between h-14 bg-white/50 dark:bg-neutral-900/50 backdrop-blur-sm">
+    <header class="z-10 flex flex-row items-center md:justify-between h-20 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-xl border-b border-gray-100/50 dark:border-neutral-800/50">
       <Button
         :class="[
           file ? '' : 'opacity-50 pointer-events-none',
-          'pl-1 pr-1 mx-1 sm:mx-5',
+          'pl-3 pr-4 mx-2 sm:mx-6 rounded-full',
         ].join(' ')"
         @click="handleStartNew"
       >
         <template #icon>
-          <ArrowLeftIcon class="w-6 h-6" />
+          <ArrowLeftIcon class="w-5 h-5" />
         </template>
         <div class="md:w-[290px]">
           <span class="hidden sm:inline select-none">
@@ -17,25 +17,30 @@
           </span>
         </div>
       </Button>
-      <div class="text-3xl font-semibold text-gray-900 dark:text-white tracking-tight hover:text-primary transition duration-200 ease-in-out">
-        Inpaint-web
+      <div class="text-center">
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white tracking-tight mb-2">
+          智能图像修复
+        </h1>
+        <p class="text-sm text-gray-500 dark:text-gray-400">
+          本地 AI · 一键去水印 · 高清修复
+        </p>
       </div>
-      <div class="hidden md:flex justify-end w-[300px] mx-1 sm:mx-5">
-        <Button class="mr-3 flex" @click="toggleTheme">
+      <div class="hidden md:flex justify-end w-[300px] mx-2 sm:mx-6 space-x-2">
+        <Button class="rounded-full" @click="toggleTheme">
           <template #icon>
             <SunIcon v-if="!isDarkMode" class="w-5 h-5" />
             <MoonIcon v-else class="w-5 h-5" />
           </template>
         </Button>
-        <Button class="mr-3 flex" @click="toggleLanguage">
+        <Button class="rounded-full" @click="toggleLanguage">
           <p>{{ languageTag() === 'en' ? '切换到中文' : 'en' }}</p>
         </Button>
         <Button
-          class="w-38 flex sm:visible"
+          class="rounded-full"
           @click="showAbout = true"
         >
           <template #icon>
-            <InformationCircleIcon class="w-6 h-6" />
+            <InformationCircleIcon class="w-5 h-5" />
           </template>
           <p>{{ feedbackText }}</p>
         </Button>
@@ -43,19 +48,19 @@
     </header>
 
     <main
-      :style="{ height: 'calc(100vh - 56px)' }"
+      :style="{ height: 'calc(100vh - 80px)' }"
       class="relative"
     >
       <Editor v-if="file" ref="editorRef" :file="file" />
-      <div v-else class="flex h-full flex-1 flex-col items-center justify-center overflow-hidden px-4">
+      <div v-else class="flex h-full flex-1 flex-col items-center justify-center overflow-hidden px-4 py-12">
         <div class="h-72 sm:w-1/2 max-w-5xl">
           <FileSelect
             @selection="handleFileSelection"
           />
         </div>
-        <div class="flex flex-col sm:flex-row pt-10 items-center justify-center cursor-pointer">
-          <span class="text-gray-500 dark:text-neutral-400 text-sm">{{ tryItImagesText }}</span>
-          <div class="flex space-x-2 sm:space-x-4 px-4">
+        <div class="flex flex-col sm:flex-row pt-12 items-center justify-center cursor-pointer">
+          <span class="text-gray-500 dark:text-neutral-400 text-sm mb-4 sm:mb-0 sm:mr-6">{{ tryItImagesText }}</span>
+          <div class="flex space-x-3 sm:space-x-5 px-4">
             <div
               v-for="image in demoImages"
               :key="image"
@@ -63,10 +68,10 @@
               @keydown="startWithDemoImage(image)"
               role="button"
               tabindex="-1"
-              class="transition-all duration-200 hover:scale-105 hover:opacity-90"
+              class="transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:scale-110 hover:shadow-xl hover:shadow-primary/20 rounded-2xl overflow-hidden"
             >
               <img
-                class="rounded-lg w-auto h-25 ring-1 ring-gray-200 dark:ring-neutral-800 hover:ring-primary/50"
+                class="rounded-2xl w-auto h-25 ring-2 ring-gray-200/50 dark:ring-neutral-700/50 hover:ring-primary/60 transition-all duration-500"
                 :src="`examples/${image}.jpeg`"
                 :alt="image"
                 :style="{ height: '100px' }"

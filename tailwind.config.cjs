@@ -10,7 +10,7 @@ module.exports = {
         'pulse-fast': 'pulse 0.7s cubic-bezier(0.4, 0, 0.6, 1) infinite',
       },
       colors: {
-        primary: '#2563eb',
+        primary: '#8B5CF6',
       },
     },
   },

@@ -54,7 +54,7 @@ const buttonClass = computed(() => {
   return [
     'inline-flex space-x-3 py-2.5 px-4 rounded-lg cursor-pointer',
     'transition-all duration-200 ease-out',
-    'focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-neutral-900',
+    'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-900',
     'active:scale-95',
     background.value,
     props.className || '',

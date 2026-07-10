@@ -1,8 +1,14 @@
 <template>
   <label
     :for="uploadElemId"
-    class="block w-full h-full group relative cursor-pointer rounded-xl font-medium focus-within:outline-none"
+    class="block w-full h-full group relative cursor-pointer font-medium focus-within:outline-none"
   >
+    <!-- 外层边框 -->
+    <div class="absolute inset-0 rounded-3xl bg-gradient-to-br from-primary/10 to-primary/5 dark:from-primary/20 dark:to-primary/10 p-[2px]">
+      <div class="w-full h-full rounded-3xl bg-white dark:bg-neutral-900"></div>
+    </div>
+    
+    <!-- 内层内容 -->
     <div
       :class="dropZoneClass"
       @drop="handleDrop"
@@ -17,7 +23,14 @@
         @change="handleFileChange"
         accept="image/png, image/jpeg, image/webp"
       />
-      <p class="text-gray-600 dark:text-neutral-300">{{ dropZoneText }}</p>
+      <div class="flex flex-col items-center gap-3">
+        <div class="w-16 h-16 rounded-2xl bg-primary/10 dark:bg-primary/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]">
+          <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+          </svg>
+        </div>
+        <p class="text-gray-600 dark:text-neutral-300 text-center">{{ dropZoneText }}</p>
+      </div>
     </div>
   </label>
 </template>
@@ -39,13 +52,13 @@ const dropZoneText = m.drop_zone()
 
 const dropZoneClass = computed(() => {
   return [
-    'w-full h-full flex items-center justify-center px-6 pt-5 pb-6 text-xl',
-    'border-4 border-dashed rounded-md',
-    'hover:border-gray-900 dark:hover:border-white hover:bg-gray-50 dark:hover:bg-neutral-800',
-    'text-center transition-colors',
+    'relative w-full h-full flex items-center justify-center px-6 pt-5 pb-6 text-xl',
+    'border-2 border-dashed rounded-3xl',
+    'hover:border-primary dark:hover:border-primary hover:bg-primary/5 dark:hover:bg-primary/10',
+    'text-center transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]',
     dragHover.value
-      ? 'border-gray-900 dark:border-white bg-gray-50 dark:bg-neutral-800'
-      : 'bg-gray-50 dark:bg-neutral-900 border-gray-300 dark:border-neutral-700',
+      ? 'border-primary bg-primary/10 dark:bg-primary/20 scale-[1.02]'
+      : 'border-gray-300 dark:border-neutral-600 bg-white/50 dark:bg-neutral-800/50',
   ].join(' ')
 })
 
