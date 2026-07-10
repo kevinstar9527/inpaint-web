@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-full flex flex-col relative">
-    <header class="z-10 shadow flex flex-row items-center md:justify-between h-14">
+    <header class="z-10 border-b border-gray-200 dark:border-neutral-800 flex flex-row items-center md:justify-between h-14 bg-white/50 dark:bg-neutral-900/50 backdrop-blur-sm">
       <Button
         :class="[
           file ? '' : 'opacity-50 pointer-events-none',
@@ -17,11 +17,17 @@
           </span>
         </div>
       </Button>
-      <div class="text-4xl font-bold text-blue-600 hover:text-blue-700 transition duration-300 ease-in-out">
+      <div class="text-3xl font-semibold text-gray-900 dark:text-white tracking-tight hover:text-primary transition duration-200 ease-in-out">
         Inpaint-web
       </div>
       <div class="hidden md:flex justify-end w-[300px] mx-1 sm:mx-5">
-        <Button class="mr-5 flex" @click="toggleLanguage">
+        <Button class="mr-3 flex" @click="toggleTheme">
+          <template #icon>
+            <SunIcon v-if="!isDarkMode" class="w-5 h-5" />
+            <MoonIcon v-else class="w-5 h-5" />
+          </template>
+        </Button>
+        <Button class="mr-3 flex" @click="toggleLanguage">
           <p>{{ languageTag() === 'en' ? '切换到中文' : 'en' }}</p>
         </Button>
         <Button
@@ -41,14 +47,14 @@
       class="relative"
     >
       <Editor v-if="file" :file="file" />
-      <div v-else class="flex h-full flex-1 flex-col items-center justify-center overflow-hidden">
+      <div v-else class="flex h-full flex-1 flex-col items-center justify-center overflow-hidden px-4">
         <div class="h-72 sm:w-1/2 max-w-5xl">
           <FileSelect
             @selection="handleFileSelection"
           />
         </div>
         <div class="flex flex-col sm:flex-row pt-10 items-center justify-center cursor-pointer">
-          <span class="text-gray-500">{{ tryItImagesText }}</span>
+          <span class="text-gray-500 dark:text-neutral-400 text-sm">{{ tryItImagesText }}</span>
           <div class="flex space-x-2 sm:space-x-4 px-4">
             <div
               v-for="image in demoImages"
@@ -57,9 +63,10 @@
               @keydown="startWithDemoImage(image)"
               role="button"
               tabindex="-1"
+              class="transition-all duration-200 hover:scale-105 hover:opacity-90"
             >
               <img
-                class="rounded-md hover:opacity-75 w-auto h-25"
+                class="rounded-lg w-auto h-25 ring-1 ring-gray-200 dark:ring-neutral-800 hover:ring-primary/50"
                 :src="`examples/${image}.jpeg`"
                 :alt="image"
                 :style="{ height: '100px' }"
@@ -71,12 +78,12 @@
     </main>
 
     <Modal v-if="showAbout">
-      <div ref="modalRef" class="text-xl space-y-5">
-        <p>
+      <div ref="modalRef" class="text-lg space-y-5 max-w-2xl">
+        <p class="text-gray-700 dark:text-neutral-200">
           任何问题到:
           <a
             href="https://github.com/kevinstar9527/inpaint-web"
-            style="color: blue"
+            class="text-primary hover:text-primary/80 underline underline-offset-2 transition-colors"
             rel="noreferrer"
             target="_blank"
           >
@@ -84,11 +91,11 @@
           </a>
           反馈
         </p>
-        <p>
+        <p class="text-gray-700 dark:text-neutral-200">
           For any questions, please go to:
           <a
             href="https://github.com/kevinstar9527/inpaint-web"
-            style="color: blue"
+            class="text-primary hover:text-primary/80 underline underline-offset-2 transition-colors"
             rel="noreferrer"
             target="_blank"
           >
@@ -100,8 +107,8 @@
     </Modal>
 
     <Modal v-if="downloadProgress < 100">
-      <div class="text-xl space-y-5">
-        <p>{{ inpaintModelDownloadMessage }}</p>
+      <div class="text-lg space-y-5 max-w-2xl">
+        <p class="text-gray-700 dark:text-neutral-200">{{ inpaintModelDownloadMessage }}</p>
         <Progress :percent="downloadProgress" />
       </div>
     </Modal>
@@ -111,7 +118,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import { onClickOutside } from '@vueuse/core'
-import { ArrowLeftIcon, InformationCircleIcon } from '@heroicons/vue/24/outline'
+import { ArrowLeftIcon, InformationCircleIcon, SunIcon, MoonIcon } from '@heroicons/vue/24/outline'
 import Button from './components/Button.vue'
 import FileSelect from './components/FileSelect.vue'
 import Modal from './components/Modal.vue'
@@ -128,9 +135,16 @@ import {
 
 const file = ref<File>()
 const stateLanguageTag = ref<'en' | 'zh'>('zh')
+const isDarkMode = ref(false)
 
 onSetLanguageTag(() => {
   stateLanguageTag.value = languageTag() as 'en' | 'zh'
+})
+
+onMounted(() => {
+  // 默认日间模式
+  isDarkMode.value = false
+  document.documentElement.classList.remove('dark')
 })
 
 const showAbout = ref(false)
@@ -171,5 +185,10 @@ function toggleLanguage() {
   } else {
     setLanguageTag('zh')
   }
+}
+
+function toggleTheme() {
+  isDarkMode.value = !isDarkMode.value
+  document.documentElement.classList.toggle('dark', isDarkMode.value)
 }
 </script>

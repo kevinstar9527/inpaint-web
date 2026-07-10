@@ -11,10 +11,10 @@
       :style="{ height: '116px' }"
       :class="[
         'flex-shrink-0',
-        'mt-4 border p-3 rounded',
+        'mt-4 border border-gray-200 dark:border-neutral-800 bg-white/50 dark:bg-neutral-900/50 p-3 rounded-lg',
         'flex items-left w-full max-w-4xl',
         'space-y-0 flex-row space-x-5',
-        'scrollbar-thin scrollbar-thumb-black scrollbar-track-primary overflow-x-scroll',
+        'scrollbar-thin scrollbar-thumb-gray-400 dark:scrollbar-thumb-neutral-700 scrollbar-track-gray-100 dark:scrollbar-track-neutral-900 overflow-x-scroll',
       ].join(' ')"
     >
       <div
@@ -141,11 +141,11 @@
         </div>
         <div
           v-if="isInpaintingLoading"
-          class="z-10 bg-white absolute bg-opacity-80 top-0 left-0 right-0 bottom-0 h-full w-full flex justify-center items-center"
+          class="z-10 bg-black/50 backdrop-blur-sm absolute top-0 left-0 right-0 bottom-0 h-full w-full flex justify-center items-center"
         >
-          <div ref="modalRef" class="text-xl space-y-5 w-4/5 sm:w-1/2">
-            <p>正在处理中，请耐心等待。。。</p>
-            <p>It is being processed, please be patient...</p>
+          <div ref="modalRef" class="text-lg space-y-5 w-11/12 sm:w-3/4 lg:w-2/3 bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-xl p-8">
+            <p class="text-gray-700 dark:text-neutral-200">正在处理中，请耐心等待...</p>
+            <p class="text-gray-700 dark:text-neutral-200">It is being processed, please be patient...</p>
             <Progress :percent="generateProgress" />
           </div>
         </div>
@@ -174,7 +174,7 @@
     <div
       :class="[
         'flex-shrink-0',
-        'bg-white rounded-md border border-gray-300 hover:border-gray-400 shadow-md hover:shadow-lg p-4 transition duration-200 ease-in-out',
+        'bg-white/80 dark:bg-neutral-900/80 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-neutral-800 p-4 transition duration-200 ease-in-out',
         'flex items-center w-full max-w-4xl py-6 mb-4, justify-between',
         'flex-col space-y-2 sm:space-y-0 sm:flex-row sm:space-x-5',
       ].join(' ')"

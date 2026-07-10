@@ -25,7 +25,8 @@
     "format": "prettier --write .",
     "postinstall": "paraglide-js compile --project ./project.inlang",
     "paraglide": "paraglide-js compile --project ./project.inlang",
-    "deploy": "vite build && gh-pages -d dist"
+    "deploy": "vite build && gh-pages -d dist",
+    "onlydeploy": "gh-pages -d dist"
   },
   "lint-staged": {
     "*.{vue,js,ts,jsx,tsx,css,sass,scss,md}": [

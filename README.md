@@ -60,6 +60,8 @@ great online services [here](https://cleanup.pictures/).
 
 Model: https://github.com/Picsart-AI-Research/MI-GAN
 
+Fork from https://github.com/lxfater/inpaint-web
+
 
 
 

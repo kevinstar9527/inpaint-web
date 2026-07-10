@@ -1,8 +1,8 @@
 <template>
-  <div class="inline-flex items-center space-x-4 text-black">
-    <span>{{ label }}</span>
+  <div class="inline-flex items-center space-x-4 text-gray-700 dark:text-neutral-200">
+    <span class="text-sm font-medium">{{ label }}</span>
     <input
-      :class="['appearance-none rounded-lg h-4', 'bg-primary'].join(' ')"
+      :class="['appearance-none rounded-lg h-2', 'bg-gray-200 dark:bg-neutral-700'].join(' ')"
       type="range"
       :step="step"
       :min="min"

@@ -7,7 +7,7 @@
     @pointerup="onPointerUp"
     @pointerenter="onPointerEnter"
     @pointerleave="onPointerLeave"
-    tabindex="-1"
+    tabindex="0"
     :class="buttonClass"
     :style="style"
   >
@@ -42,17 +42,20 @@ const active = ref(false)
 
 const background = computed(() => {
   if (props.primary) {
-    return 'bg-primary hover:bg-black hover:text-white'
+    return 'bg-primary hover:bg-primary/90 text-white'
   }
   if (active.value) {
-    return 'bg-black text-white'
+    return 'bg-gray-200 dark:bg-neutral-700 text-gray-900 dark:text-white'
   }
-  return 'hover:bg-primary'
+  return 'hover:bg-gray-100 dark:hover:bg-neutral-800 text-gray-700 dark:text-neutral-200'
 })
 
 const buttonClass = computed(() => {
   return [
-    'inline-flex space-x-3 py-3 px-5 rounded-md cursor-pointer',
+    'inline-flex space-x-3 py-2.5 px-4 rounded-lg cursor-pointer',
+    'transition-all duration-200 ease-out',
+    'focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-neutral-900',
+    'active:scale-95',
     background.value,
     props.className || '',
   ].join(' ')

@@ -1,7 +1,7 @@
 <template>
   <label
     :for="uploadElemId"
-    class="block w-full h-full group relative cursor-pointer rounded-md font-medium focus-within:outline-none"
+    class="block w-full h-full group relative cursor-pointer rounded-xl font-medium focus-within:outline-none"
   >
     <div
       :class="dropZoneClass"
@@ -17,7 +17,7 @@
         @change="handleFileChange"
         accept="image/png, image/jpeg, image/webp"
       />
-      <p>{{ dropZoneText }}</p>
+      <p class="text-gray-600 dark:text-neutral-300">{{ dropZoneText }}</p>
     </div>
   </label>
 </template>
@@ -41,9 +41,11 @@ const dropZoneClass = computed(() => {
   return [
     'w-full h-full flex items-center justify-center px-6 pt-5 pb-6 text-xl',
     'border-4 border-dashed rounded-md',
-    'hover:border-black hover:bg-primary',
-    'text-center',
-    dragHover.value ? 'border-black bg-primary' : 'bg-gray-100 border-gray-300',
+    'hover:border-gray-900 dark:hover:border-white hover:bg-gray-50 dark:hover:bg-neutral-800',
+    'text-center transition-colors',
+    dragHover.value
+      ? 'border-gray-900 dark:border-white bg-gray-50 dark:bg-neutral-800'
+      : 'bg-gray-50 dark:bg-neutral-900 border-gray-300 dark:border-neutral-700',
   ].join(' ')
 })
 
