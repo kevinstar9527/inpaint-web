@@ -11,6 +11,7 @@
     <!-- 内层内容 -->
     <div
       :class="dropZoneClass"
+      :style="{ borderWidth: '3px' }"
       @drop="handleDrop"
       @dragover="handleDragOver"
       @dragleave="handleDragLeave"
@@ -57,7 +58,7 @@ const dropZoneText = computed(() => {
 const dropZoneClass = computed(() => {
   return [
     'relative w-full h-full flex items-center justify-center px-6 pt-5 pb-6 text-xl',
-    'border-2 border-dashed rounded-3xl',
+    'border-dashed rounded-3xl',
     'hover:border-primary dark:hover:border-primary hover:bg-primary/5 dark:hover:bg-primary/10',
     'text-center transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]',
     dragHover.value

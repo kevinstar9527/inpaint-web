@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-full flex flex-col relative">
-    <header class="z-10 flex flex-row items-center md:justify-between h-20 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-xl border-b border-gray-100/50 dark:border-neutral-800/50">
+    <header class="z-10 flex flex-row items-center md:justify-between h-20 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-xl border-b border-gray-200 dark:border-neutral-700">
       <Button
         :class="[
           file ? '' : 'opacity-50 pointer-events-none',
