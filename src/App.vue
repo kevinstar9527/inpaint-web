@@ -136,7 +136,7 @@ import {
   languageTag,
   setLanguageTag,
 } from './paraglide/runtime'
-import { stateLanguageTag } from './paraglide/reactive'
+import { stateLanguageTag } from './reactive'
 
 const file = ref<File>()
 const isDarkMode = ref(false)

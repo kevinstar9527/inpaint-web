@@ -1,5 +1,7 @@
 {
 	"$schema": "https://inlang.com/schema/inlang-message-format",
+	"app_title": "智能图像修复",
+	"app_subtitle": "本地 AI · 一键去水印 · 高清修复",
 	"drop_zone": "点击 或者 拖拽到这里",
 	"try_it_images": "试一试:",
 	"feedback": "联系作者",
@@ -10,5 +12,6 @@
 	"download": "下载",
 	"undo": "撤销",
 	"inpaint_model_download_message": "需要下载一次30MB大小模型文件,耐心等待。。。",
-	"upscaleing_model_download_message": "需要下载一次70MB大小模型文件,耐心等待。。。"
+	"upscaleing_model_download_message": "需要下载一次70MB大小模型文件,耐心等待。。。",
+	"file_too_large": "文件过大，请选择 20MB 以内的图片"
 }

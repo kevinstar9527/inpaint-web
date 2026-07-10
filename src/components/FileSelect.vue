@@ -38,7 +38,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import * as m from '../paraglide/messages'
-import { stateLanguageTag } from '../paraglide/reactive'
+import { stateLanguageTag } from '../reactive'
 
 interface Props {
   onSelection: (file: File) => void
@@ -75,8 +75,8 @@ function onFileSelected(file: File) {
     return
   }
   try {
-    if (file.size > 10 * 1024 * 1024) {
-      throw new Error('file too large')
+    if (file.size > 20 * 1024 * 1024) {
+      throw new Error(m.file_too_large())
     }
     props.onSelection(file)
   } catch (e) {

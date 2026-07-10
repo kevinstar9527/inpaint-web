@@ -247,7 +247,7 @@ import Progress from './components/Progress.vue'
 import { modelExists, downloadModel } from './adapters/cache'
 import Modal from './components/Modal.vue'
 import * as m from './paraglide/messages'
-import { stateLanguageTag } from './paraglide/reactive'
+import { stateLanguageTag } from './reactive'
 
 interface Props {
   file: File
