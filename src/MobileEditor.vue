@@ -291,6 +291,7 @@ function drawLines(
   color = 'rgba(255, 0, 0, 0.5)'
 ) {
   ctx.strokeStyle = color
+  ctx.fillStyle = color
   ctx.lineCap = 'round'
   ctx.lineJoin = 'round'
 
@@ -299,6 +300,13 @@ function drawLines(
       return
     }
     ctx.lineWidth = line.size
+    // If only one point, draw a circle/dot
+    if (line.pts.length === 1) {
+      ctx.beginPath()
+      ctx.arc(line.pts[0].x, line.pts[0].y, line.size / 2, 0, Math.PI * 2)
+      ctx.fill()
+      return
+    }
     ctx.beginPath()
     ctx.moveTo(line.pts[0].x, line.pts[0].y)
     line.pts.forEach(pt => ctx.lineTo(pt.x, pt.y))
@@ -378,6 +386,11 @@ function setupCanvasEvents() {
   const canvas = canvasRef.value
   if (!canvas) return
 
+  // Track touch start position for tap-to-paint support
+  let touchStartPos: { x: number; y: number } | null = null
+  // Flag to prevent mouse events from firing after touch events on touch devices
+  let isTouching = false
+
   const onTouchMove = (ev: TouchEvent) => {
     ev.preventDefault()
     ev.stopPropagation()
@@ -391,7 +404,7 @@ function setupCanvasEvents() {
   }
 
   const onMouseDrag = (e: MouseEvent) => {
-    if (!currentStroke.value) return
+    if (!currentStroke.value || isTouching) return
     const px = e.offsetX - canvas.offsetLeft
     const py = e.offsetY - canvas.offsetTop
     currentStroke.value.pts.push({ x: px, y: py })
@@ -413,30 +426,54 @@ function setupCanvasEvents() {
       src: '',
     }
 
+    // Record touch start position for tap detection
     if ('touches' in ev) {
+      isTouching = true
+      const coords = canvas.getBoundingClientRect()
+      touchStartPos = {
+        x: ev.touches[0].clientX - coords.x,
+        y: ev.touches[0].clientY - coords.y,
+      }
       canvas.addEventListener('touchmove', onTouchMove, { passive: false })
     } else {
+      if (isTouching) return
+      const px = (ev as MouseEvent).offsetX - canvas.offsetLeft
+      const py = (ev as MouseEvent).offsetY - canvas.offsetTop
+      touchStartPos = { x: px, y: py }
       canvas.addEventListener('mousemove', onMouseDrag)
     }
   }
 
   const onTouchEnd = () => {
     canvas.removeEventListener('touchmove', onTouchMove)
+    // Handle tap: if no movement, draw a dot at the tap position
+    if (currentStroke.value && currentStroke.value.pts.length === 0 && touchStartPos) {
+      currentStroke.value.pts.push({ ...touchStartPos })
+    }
     // Commit the current stroke
     if (currentStroke.value && currentStroke.value.pts.length > 0) {
       strokes.value.push(currentStroke.value)
     }
     currentStroke.value = null
+    touchStartPos = null
+    // Delay resetting isTouching to block subsequent mouse events from touch devices
+    setTimeout(() => { isTouching = false }, 500)
     draw()
   }
 
   const onMouseUp = () => {
     canvas.removeEventListener('mousemove', onMouseDrag)
+    if (isTouching) return
+    // Handle click: if no movement, draw a dot at the click position
+    if (currentStroke.value && currentStroke.value.pts.length === 0 && touchStartPos) {
+      currentStroke.value.pts.push({ ...touchStartPos })
+    }
     // Commit the current stroke
     if (currentStroke.value && currentStroke.value.pts.length > 0) {
       strokes.value.push(currentStroke.value)
     }
     currentStroke.value = null
+    touchStartPos = null
     draw()
   }
 
