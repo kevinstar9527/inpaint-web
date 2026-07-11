@@ -5,7 +5,7 @@
   >
     <!-- Canvas Area - maximize space -->
     <div
-      class="flex-grow flex justify-center items-center relative overflow-hidden"
+      class="flex-grow flex justify-center items-center relative overflow-auto"
       ref="canvasDiv"
     >
       <div class="relative w-full h-full flex items-center justify-center p-2">
@@ -14,6 +14,21 @@
           ref="canvasRef"
           style="touch-action: none;"
         />
+        <!-- Zoom indicator -->
+        <div
+          v-if="zoomLevel > 1"
+          class="absolute top-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded pointer-events-none"
+        >
+          {{ Math.round(zoomLevel * 100) }}%
+        </div>
+        <!-- Reset zoom button -->
+        <button
+          v-if="zoomLevel > 1"
+          class="absolute top-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded active:bg-black/80"
+          @click="resetZoom"
+        >
+          重置缩放
+        </button>
         <!-- Original image comparison overlay -->
         <div
           :class="[
@@ -237,7 +252,7 @@ const isInpaintingLoading = ref(false)
 const generateProgress = ref(0)
 const originalImgRef = ref<HTMLDivElement>()
 const separatorLeft = ref(0)
-const scaledBrushSize = computed(() => brushSize.value)
+const scaledBrushSize = computed(() => brushSize.value / zoomLevel.value)
 const canvasDiv = ref<HTMLDivElement>()
 const canvasRef = ref<HTMLCanvasElement>()
 const downloaded = ref(true)
@@ -251,6 +266,13 @@ const showEraseButton = ref(true)
 const showUpscaledResult = ref(false)
 // The base file for next erasure (original or last result)
 const baseFile = ref<File | null>(null)
+
+// Zoom state for pinch-to-zoom
+const zoomLevel = ref(1)
+const panX = ref(0)
+const panY = ref(0)
+const MIN_ZOOM = 1
+const MAX_ZOOM = 10
 
 const upscaleingModelDownloadMessage = computed(() => {
   stateLanguageTag.value
@@ -344,12 +366,42 @@ const draw = () => {
 
   context.value.drawImage(currRender, 0, 0, canvas.width, canvas.height)
 
-  // Draw all committed strokes
+  // Draw all committed strokes in base coordinates
   drawLines(context.value, strokes.value)
   // Draw current stroke being drawn
   if (currentStroke.value) {
     drawLines(context.value, [currentStroke.value])
   }
+
+  // Apply CSS transform for visual zoom
+  applyZoomTransform()
+}
+
+function applyZoomTransform() {
+  const canvas = canvasRef.value
+  if (!canvas) return
+  canvas.style.transform = `translate(${panX.value}px, ${panY.value}px) scale(${zoomLevel.value})`
+  canvas.style.transformOrigin = 'top left'
+}
+
+// Convert screen coordinates to base canvas coordinates (accounting for zoom)
+function screenToBaseCoords(clientX: number, clientY: number): { x: number; y: number } {
+  const canvas = canvasRef.value
+  if (!canvas) return { x: clientX, y: clientY }
+  const rect = canvas.getBoundingClientRect()
+  // rect gives us the scaled position, so we need to undo the scale
+  return {
+    x: (clientX - rect.left) / zoomLevel.value,
+    y: (clientY - rect.top) / zoomLevel.value,
+  }
+}
+
+// Reset zoom to default
+function resetZoom() {
+  zoomLevel.value = 1
+  panX.value = 0
+  panY.value = 0
+  applyZoomTransform()
 }
 
 const refreshCanvasMask = () => {
@@ -391,23 +443,70 @@ function setupCanvasEvents() {
   // Flag to prevent mouse events from firing after touch events on touch devices
   let isTouching = false
 
+  // Pinch-to-zoom state
+  let initialPinchDistance = 0
+  let initialZoomLevel = 1
+  let initialPanX = 0
+  let initialPanY = 0
+  let isPinching = false
+  // Focal point: the canvas base coords under the pinch midpoint at pinch start
+  let focalBx = 0
+  let focalBy = 0
+  // Canvas layout position (without transform) at pinch start
+  let canvasBaseLeft = 0
+  let canvasBaseTop = 0
+
+  function getTouchDistance(t1: Touch, t2: Touch): number {
+    const dx = t1.clientX - t2.clientX
+    const dy = t1.clientY - t2.clientY
+    return Math.sqrt(dx * dx + dy * dy)
+  }
+
+  function getTouchMidpoint(t1: Touch, t2: Touch): { x: number; y: number } {
+    return {
+      x: (t1.clientX + t2.clientX) / 2,
+      y: (t1.clientY + t2.clientY) / 2,
+    }
+  }
+
   const onTouchMove = (ev: TouchEvent) => {
     ev.preventDefault()
     ev.stopPropagation()
-    if (!currentStroke.value) return
-    const coords = canvas.getBoundingClientRect()
-    currentStroke.value.pts.push({
-      x: ev.touches[0].clientX - coords.x,
-      y: ev.touches[0].clientY - coords.y,
-    })
+
+    // Handle pinch-to-zoom (two fingers)
+    if (ev.touches.length === 2) {
+      isPinching = true
+      // Cancel any current drawing stroke
+      currentStroke.value = null
+
+      const dist = getTouchDistance(ev.touches[0], ev.touches[1])
+      const mid = getTouchMidpoint(ev.touches[0], ev.touches[1])
+
+      // Calculate new zoom level
+      const scale = dist / initialPinchDistance
+      const newZoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, initialZoomLevel * scale))
+      zoomLevel.value = newZoom
+
+      // Adjust pan so focal point stays under the current midpoint
+      // screen = layout + pan + base * zoom  =>  pan = screen - layout - base * zoom
+      panX.value = mid.x - canvasBaseLeft - focalBx * newZoom
+      panY.value = mid.y - canvasBaseTop - focalBy * newZoom
+
+      applyZoomTransform()
+      return
+    }
+
+    // Single finger drawing - convert to base coordinates
+    if (!currentStroke.value || isPinching) return
+    const baseCoords = screenToBaseCoords(ev.touches[0].clientX, ev.touches[0].clientY)
+    currentStroke.value.pts.push(baseCoords)
     draw()
   }
 
   const onMouseDrag = (e: MouseEvent) => {
     if (!currentStroke.value || isTouching) return
-    const px = e.offsetX - canvas.offsetLeft
-    const py = e.offsetY - canvas.offsetTop
-    currentStroke.value.pts.push({ x: px, y: py })
+    const baseCoords = screenToBaseCoords(e.clientX, e.clientY)
+    currentStroke.value.pts.push(baseCoords)
     draw()
   }
 
@@ -415,6 +514,31 @@ function setupCanvasEvents() {
     if (!original.value.src || showOriginal.value) {
       return
     }
+
+    // Handle two-finger pinch start
+    if ('touches' in ev && ev.touches.length === 2) {
+      isPinching = true
+      isTouching = true
+      initialPinchDistance = getTouchDistance(ev.touches[0], ev.touches[1])
+      initialZoomLevel = zoomLevel.value
+      initialPanX = panX.value
+      initialPanY = panY.value
+      const mid = getTouchMidpoint(ev.touches[0], ev.touches[1])
+      const canvas = canvasRef.value!
+      // Canvas layout position (unaffected by CSS transform)
+      canvasBaseLeft = canvas.offsetLeft
+      canvasBaseTop = canvas.offsetTop
+      // Focal point in base canvas coords under the pinch midpoint
+      // screen = layout + pan + base * zoom  =>  base = (screen - layout - pan) / zoom
+      focalBx = (mid.x - canvasBaseLeft - panX.value) / zoomLevel.value
+      focalBy = (mid.y - canvasBaseTop - panY.value) / zoomLevel.value
+      // Cancel any current stroke
+      currentStroke.value = null
+      return
+    }
+
+    // If pinching, don't start drawing
+    if (isPinching) return
 
     // Clear redo stack when starting new stroke
     redoStrokes.value = []
@@ -426,26 +550,44 @@ function setupCanvasEvents() {
       src: '',
     }
 
-    // Record touch start position for tap detection
+    // Record touch start position for tap detection (in base coords)
     if ('touches' in ev) {
       isTouching = true
-      const coords = canvas.getBoundingClientRect()
-      touchStartPos = {
-        x: ev.touches[0].clientX - coords.x,
-        y: ev.touches[0].clientY - coords.y,
-      }
+      touchStartPos = screenToBaseCoords(ev.touches[0].clientX, ev.touches[0].clientY)
       canvas.addEventListener('touchmove', onTouchMove, { passive: false })
     } else {
       if (isTouching) return
-      const px = (ev as MouseEvent).offsetX - canvas.offsetLeft
-      const py = (ev as MouseEvent).offsetY - canvas.offsetTop
-      touchStartPos = { x: px, y: py }
+      touchStartPos = screenToBaseCoords((ev as MouseEvent).clientX, (ev as MouseEvent).clientY)
       canvas.addEventListener('mousemove', onMouseDrag)
     }
   }
 
-  const onTouchEnd = () => {
+  const onTouchEnd = (ev: TouchEvent) => {
     canvas.removeEventListener('touchmove', onTouchMove)
+
+    // If we were pinching and one finger lifted, check if still pinching
+    if (isPinching) {
+      if (ev.touches.length >= 2) {
+        // Still two fingers, re-init pinch
+        initialPinchDistance = getTouchDistance(ev.touches[0], ev.touches[1])
+        initialZoomLevel = zoomLevel.value
+        initialPanX = panX.value
+        initialPanY = panY.value
+        const mid = getTouchMidpoint(ev.touches[0], ev.touches[1])
+        const canvas = canvasRef.value!
+        canvasBaseLeft = canvas.offsetLeft
+        canvasBaseTop = canvas.offsetTop
+        focalBx = (mid.x - canvasBaseLeft - panX.value) / zoomLevel.value
+        focalBy = (mid.y - canvasBaseTop - panY.value) / zoomLevel.value
+      } else {
+        // Pinch ended
+        isPinching = false
+        // Delay resetting isTouching to block subsequent mouse events
+        setTimeout(() => { isTouching = false }, 500)
+      }
+      return
+    }
+
     // Handle tap: if no movement, draw a dot at the tap position
     if (currentStroke.value && currentStroke.value.pts.length === 0 && touchStartPos) {
       currentStroke.value.pts.push({ ...touchStartPos })
@@ -478,6 +620,7 @@ function setupCanvasEvents() {
   }
 
   canvas.addEventListener('touchstart', onPointerStart, { passive: false })
+  canvas.addEventListener('touchmove', onTouchMove, { passive: false })
   canvas.addEventListener('touchend', onTouchEnd)
   canvas.addEventListener('mousedown', onPointerStart)
   canvas.addEventListener('mouseup', onMouseUp)
@@ -585,6 +728,8 @@ const startErase = async () => {
     // Clear strokes after successful erasure
     strokes.value = []
     redoStrokes.value = []
+    // Reset zoom after erasure
+    resetZoom()
     // Switch to result mode - show save/continue buttons
     showEraseButton.value = false
     // Update baseFile to the result for next erasure
