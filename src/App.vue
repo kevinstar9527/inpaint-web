@@ -1,6 +1,7 @@
 <template>
   <div class="min-h-full flex flex-col relative">
-    <header class="z-10 flex flex-row items-center md:justify-between h-20 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-xl border-b border-gray-200 dark:border-neutral-700">
+    <!-- Desktop Header -->
+    <header v-if="!isMobile" class="z-10 flex flex-row items-center justify-between h-20 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-xl border-b border-gray-200 dark:border-neutral-700">
       <Button
         :class="[
           file ? '' : 'opacity-50 pointer-events-none',
@@ -25,7 +26,7 @@
           {{ m.app_subtitle() }}
         </p>
       </div>
-      <div class="hidden md:flex justify-end w-[300px] mx-2 sm:mx-6 space-x-2">
+      <div class="flex justify-end w-[300px] mx-2 sm:mx-6 space-x-2">
         <Button class="rounded-full" @click="toggleTheme">
           <template #icon>
             <SunIcon v-if="!isDarkMode" class="w-5 h-5" />
@@ -47,11 +48,38 @@
       </div>
     </header>
 
+    <!-- Mobile Header -->
+    <header v-else class="z-10 flex flex-row items-center justify-between h-12 px-3 bg-white dark:bg-neutral-900 border-b border-gray-200 dark:border-neutral-700">
+      <Button
+        :class="[
+          file ? '' : 'opacity-50 pointer-events-none',
+          'pl-2 pr-3 rounded-full',
+        ].join(' ')"
+        @click="handleStartNew"
+      >
+        <template #icon>
+          <ArrowLeftIcon class="w-5 h-5" />
+        </template>
+      </Button>
+      <h1 class="text-base font-bold text-gray-900 dark:text-white truncate mx-2">
+        {{ m.app_title() }}
+      </h1>
+      <div class="flex items-center space-x-1">
+        <button
+          class="w-8 h-8 flex items-center justify-center rounded-full text-gray-500 dark:text-gray-400"
+          @click="toggleLanguage"
+        >
+          <span class="text-xs">{{ stateLanguageTag === 'en' ? '中' : 'EN' }}</span>
+        </button>
+      </div>
+    </header>
+
     <main
-      :style="{ height: 'calc(100vh - 80px)' }"
+      :style="isMobile ? { height: 'calc(100vh - 48px)' } : { height: 'calc(100vh - 80px)' }"
       class="relative"
     >
-      <Editor v-if="file" ref="editorRef" :file="file" />
+      <MobileEditor v-if="file && isMobile" ref="mobileEditorRef" :file="file" />
+      <Editor v-else-if="file && !isMobile" ref="editorRef" :file="file" />
       <div v-else class="flex h-full flex-1 flex-col items-center justify-center overflow-hidden px-4 py-12">
         <div class="h-72 sm:w-1/2 max-w-5xl">
           <FileSelect
@@ -122,12 +150,13 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
-import { onClickOutside } from '@vueuse/core'
+import { onClickOutside, useMediaQuery } from '@vueuse/core'
 import { ArrowLeftIcon, InformationCircleIcon, SunIcon, MoonIcon } from '@heroicons/vue/24/outline'
 import Button from './components/Button.vue'
 import FileSelect from './components/FileSelect.vue'
 import Modal from './components/Modal.vue'
 import Editor from './Editor.vue'
+import MobileEditor from './MobileEditor.vue'
 import { resizeImageFile } from './utils'
 import Progress from './components/Progress.vue'
 import { downloadModel } from './adapters/cache'
@@ -141,6 +170,10 @@ import { stateLanguageTag } from './reactive'
 const file = ref<File>()
 const isDarkMode = ref(false)
 const editorRef = ref<InstanceType<typeof Editor>>()
+const mobileEditorRef = ref<InstanceType<typeof MobileEditor>>()
+
+// Mobile detection: screen width < 768px
+const isMobile = useMediaQuery('(max-width: 767px)')
 
 onMounted(() => {
   // 默认日间模式
