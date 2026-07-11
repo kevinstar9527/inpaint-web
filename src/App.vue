@@ -80,6 +80,11 @@
     >
       <MobileEditor v-if="file && isMobile" ref="mobileEditorRef" :file="file" />
       <Editor v-else-if="file && !isMobile" ref="editorRef" :file="file" />
+      <MobileHome
+        v-else-if="isMobile"
+        :onFileSelection="handleFileSelection"
+        :onDemoImage="startWithDemoImage"
+      />
       <div v-else class="flex h-full flex-1 flex-col items-center justify-center overflow-hidden px-4 py-12">
         <div class="h-72 sm:w-1/2 max-w-5xl">
           <FileSelect
@@ -157,6 +162,7 @@ import FileSelect from './components/FileSelect.vue'
 import Modal from './components/Modal.vue'
 import Editor from './Editor.vue'
 import MobileEditor from './MobileEditor.vue'
+import MobileHome from './MobileHome.vue'
 import { resizeImageFile } from './utils'
 import Progress from './components/Progress.vue'
 import { downloadModel } from './adapters/cache'

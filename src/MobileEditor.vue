@@ -192,8 +192,8 @@ interface Line {
 
 const props = defineProps<Props>()
 
-const brushSize = ref(40)
-const brushSizes = [20, 40, 60, 80, 100]
+const brushSize = ref(20)
+const brushSizes = [10, 20, 30, 40, 50]
 const [original, isOriginalLoaded] = useImage(computed(() => props.file))
 const renders = ref<HTMLImageElement[]>([])
 const context = ref<CanvasRenderingContext2D>()
@@ -547,12 +547,9 @@ const startErase = async () => {
   }
 }
 
-// Continue erasing: switch back to drawing mode, keep result as canvas background
+// Continue erasing: same as startErase, process the strokes directly
 const continueErase = () => {
-  // Just switch back to drawing mode, don't clear anything
-  // User can draw new strokes on the result image
-  showEraseButton.value = true
-  draw()
+  startErase()
 }
 
 // Save to album
